@@ -11,18 +11,18 @@ import Foundation
 public protocol LineableProtocol {
     var seq:Int { get }
     var name:String { get set }
-    var description:String? { get set }
+    var lineableDescription:String? { get set }
     var photoUrls:[String] { get set }
     var reporterName:String? { get set }
     var reporterPhoneNumber:String? { get set }
     var reportedDate:NSDate? { get set }
 }
 
-public class MissingLineable: LineableProtocol {
+public class MissingLineable: NSObject, LineableProtocol {
     
     public var seq:Int
     public var name:String
-    public var description:String?
+    public var lineableDescription:String?
     public var photoUrls:[String]
     public var reporterName:String?
     public var reporterPhoneNumber:String?
@@ -35,7 +35,7 @@ public class MissingLineable: LineableProtocol {
         self.seq = childDic["seq"] as! Int
         
         self.name = childDic["firstName"] as! String
-        self.description = childDic["description"] as? String
+        self.lineableDescription = childDic["description"] as? String
         
         var photoUrls = [String]()
         let mainPhoto = childDic["photoUrl"] as! String

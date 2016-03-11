@@ -12,20 +12,20 @@ import CoreLocation
 import CoreBluetooth
 
 #if DEBUG
-let kBASEURL = "https://dev.lineable.net"
-let kACCOUNTURL = "http://dev.lineable.net:9090"
-let kDETECTURL = "http://dev.lineable.net:8099"
-let kAWSTOKEN = "https://dev.lineable.net/log/getToken"
+public let kBASEURL = "https://dev.lineable.net"
+public let kACCOUNTURL = "http://dev.lineable.net:9090"
+public let kDETECTURL = "http://dev.lineable.net:8099"
+public let kAWSTOKEN = "https://dev.lineable.net/log/getToken"
 #else
-let kBASEURL = "https://apiv2.lineable.net"
-let kACCOUNTURL = "https://account.lineable.net"
-let kDETECTURL = "https://detect.lineable.net"
-let kAWSTOKEN = "https://apiv2.lineable.net/log/getToken"
+public let kBASEURL = "https://apiv2.lineable.net"
+public let kACCOUNTURL = "https://account.lineable.net"
+public let kDETECTURL = "https://detect.lineable.net"
+public let kAWSTOKEN = "https://apiv2.lineable.net/log/getToken"
 #endif
 
-protocol LineableHTTP {}
+public protocol LineableHTTP {}
 
-enum LineableHTTPEncodingType {
+public enum LineableHTTPEncodingType {
     case JSON
     case URL
 }
@@ -60,8 +60,8 @@ extension LineableHTTP {
         let allowedCharacterSet = NSCharacterSet.URLQueryAllowedCharacterSet().mutableCopy() as! NSMutableCharacterSet
         allowedCharacterSet.removeCharactersInString(generalDelimitersToEncode + subDelimitersToEncode)
         
-        var escaped = ""
-        
+        let escaped = string.stringByAddingPercentEncodingWithAllowedCharacters(allowedCharacterSet) ?? string
+        /*
         if #available(iOS 8.3, OSX 10.10, *) {
             escaped = string.stringByAddingPercentEncodingWithAllowedCharacters(allowedCharacterSet) ?? string
         } else {
@@ -80,7 +80,7 @@ extension LineableHTTP {
                 index = endIndex
             }
         }
-        
+        */
         return escaped
     }
     
@@ -145,7 +145,7 @@ extension LineableHTTP {
         return mutableURLRequest
     }
     
-    func sendData(type:String,url:String,encoding:LineableHTTPEncodingType,params:[String:AnyObject]?,completion:(result:Int,info:AnyObject?)->()) {
+    public func sendData(type:String,url:String,encoding:LineableHTTPEncodingType,params:[String:AnyObject]?,completion:(result:Int,info:AnyObject?)->()) {
         let sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration()
         sessionConfig.timeoutIntervalForResource = 45
         

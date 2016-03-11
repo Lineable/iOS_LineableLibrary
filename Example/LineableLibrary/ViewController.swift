@@ -17,8 +17,13 @@ class ViewController: UIViewController, LineableDetectorDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         LineableDetector.sharedDetector.delegate = self
+        
+        /*
+         *  Customize Detecting Options
+         */
+        LineableDetector.sharedDetector.detectInterval = 60.0
+        LineableDetector.sharedDetector.backgroundModeEnabled = true
     }
     
     override func didReceiveMemoryWarning() {

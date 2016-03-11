@@ -12,21 +12,17 @@ import UIKit
 import CoreLocation
 import CoreBluetooth
 
-var kLineableLib_SendLocationTime = 60.0
-var kLineableLib_BackgroundMode = true
-
-
-public enum LineableDetectorState {
-    case NoDetectedLineables
-    case ErrorSendingLineable
-    case GatewayNoMovement
-    case PreparingToSendToServer
-    case DetectFinished
-    case Idle
-    case Listening
+@objc public enum LineableDetectorState:Int {
+    case NoDetectedLineables = 0
+    case ErrorSendingLineable = 1
+    case GatewayNoMovement = 2
+    case PreparingToSendToServer = 3
+    case DetectFinished = 4
+    case Idle = 5
+    case Listening = 6
 }
 
-public protocol LineableDetectorDelegate {
+@objc public protocol LineableDetectorDelegate {
     
     func didStartRangingLineables()
     func didStopRangingLineables()
@@ -35,7 +31,7 @@ public protocol LineableDetectorDelegate {
     func statuschanged(status:LineableDetectorState)
 }
 
-protocol LineableDetectorProtocol {
+public protocol LineableDetectorProtocol {
     func updateLineables(withListenedBeacons beacons:[CLBeacon])
     func connectedLineables()->[[String:String]]
 }
@@ -45,11 +41,17 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     public static let sharedDetector = LineableDetector()
     
     public var delegate:LineableDetectorDelegate? = nil
-    var lineableDetectorProtocol:LineableDetectorProtocol? = nil
+    public var lineableDetectorProtocol:LineableDetectorProtocol? = nil
+    
+    public var missingLineable:MissingLineable? = nil
+    public var user:UserProtocol? = nil
+    
+    public var detectInterval = 60.0
+    public var backgroundModeEnabled = true
     
     let locationManager:CLLocationManager = CLLocationManager()
+    public var lastLocation:CLLocation?
     
-    var lastLocation:CLLocation?
     var lineableRegions = LineableRegions()
     var isTracking = false
     var isPreparingDetection = false
@@ -58,11 +60,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     
     var listenedBeacons = [CLBeacon]()
     
-    var missingLineable:MissingLineable? = nil
-    
     var gateway:Gateway? = nil
-    
-    var user:UserProtocol? = nil
     
     private var didListenToAllRegions = false
     private var regionsListened:[String:Bool] = [String:Bool]()
@@ -89,13 +87,13 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     }
     
     dynamic private func applicationEnteredBackground() {
-        if !kLineableLib_BackgroundMode && self.isTracking {
+        if !self.backgroundModeEnabled && self.isTracking {
             self.stopTracking()
         }
     }
     
     dynamic private func applicationWillEnterForeground() {
-        if !kLineableLib_BackgroundMode && self.isTracking {
+        if !self.backgroundModeEnabled && self.isTracking {
             self.startTracking()
         }
     }
@@ -174,7 +172,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     }
     
     public func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        if kLineableLib_BackgroundMode {
+        if self.backgroundModeEnabled {
             self.startTracking()
         }
         
@@ -182,13 +180,13 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     
     
     public func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
-        if kLineableLib_BackgroundMode {
+        if self.backgroundModeEnabled {
             self.startTracking()
         }
     }
     
     public func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
-        if kLineableLib_BackgroundMode {
+        if self.backgroundModeEnabled {
             self.startTracking()
         }
     }
@@ -256,7 +254,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         
         if let timeStamp = self.lastDetectTimeStamp {
             let interval:Double = NSDate().timeIntervalSinceDate(timeStamp)
-            if interval >= kLineableLib_SendLocationTime {
+            if interval >= self.detectInterval {
                 
                 if self.isTracking {
                     startRanging()
@@ -315,7 +313,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         else {
             
             let interval:Double = NSDate().timeIntervalSinceDate(timeStamp!)
-            let locationTimer = kLineableLib_SendLocationTime
+            let locationTimer = self.detectInterval
             if interval >= locationTimer {
                 needsToDetect = true
             }
@@ -504,7 +502,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         })
     }
     
-    private func sendDetectedBeacons(beacons:[CLBeacon],connectedLineables:[[String:String]], completion:(result:Int,missingLineable:MissingLineable?)->()) {
+    public func sendDetectedBeacons(beacons:[CLBeacon],connectedLineables:[[String:String]], completion:(result:Int,missingLineable:MissingLineable?)->()) {
         
         var beaconsDicArray = [Dictionary<String,String>]()
         for beacon in beacons {

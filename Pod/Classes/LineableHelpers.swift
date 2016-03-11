@@ -10,7 +10,7 @@ import Foundation
 import CoreLocation
 import UIKit
 
-protocol UserProtocol {
+public protocol UserProtocol {
     var id:String { get }
     var password:String { get set }
     var seq:Int { get }
@@ -47,7 +47,7 @@ func ==(lhs: CLBeacon, rhs: CLBeacon) -> Bool {
 
 extension NSDate {
     
-    class func dateByString(dateString:String) -> NSDate {
+    public class func dateByString(dateString:String) -> NSDate {
         let dateFormatter = NSDateFormatter()
         dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
         dateFormatter.dateFormat = "yyyyMMddHHmmss"
@@ -60,7 +60,7 @@ extension NSDate {
     }
     
     // or an extension function to format your date
-    func formattedWith(format:String)-> String {
+    public func formattedWith(format:String)-> String {
         let formatter = NSDateFormatter()
         //formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)  // you can set GMT time
         formatter.timeZone = NSTimeZone.localTimeZone()        // or as local time

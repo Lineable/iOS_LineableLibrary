@@ -44,6 +44,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 	</array>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>리니어블은 주변의 아이들를 지켜주고 미아를 발견하기 위해 백그라운드에서 위치정보를 사용합니다</string>
+	<string>Enter what your app does using location in the background (ex:This application monitors your location to find missing Lineable Devices near you.)</string>
 </dict>
 </plist>
