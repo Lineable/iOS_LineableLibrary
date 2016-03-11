@@ -88,6 +88,9 @@ it, simply add the following line to your Podfile:
 pod "LineableLibrary"
 ```
 
+**If your app supports iOS9.0 or above, you need to add support for background location service in Xcode.**
+for instructions, [check this awesome answer in stackoverflow](http://stackoverflow.com/a/31023941)
+
 ## Author
 
 Doheny Yoon, berrymelon@lineable.net
