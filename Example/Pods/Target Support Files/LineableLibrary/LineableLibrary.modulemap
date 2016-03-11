@@ -1,0 +1,6 @@
+framework module LineableLibrary {
+  umbrella header "LineableLibrary-umbrella.h"
+
+  export *
+  module * { export * }
+}
