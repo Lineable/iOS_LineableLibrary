@@ -1,0 +1,13 @@
+source 'https://github.com/CocoaPods/Specs.git'
+use_frameworks!
+
+target 'LineableLibrary_Example', :exclusive => true do
+  pod 'LineableLibrary', :path => '../'
+end
+
+target 'LineableLibrary_Tests', :exclusive => true do
+  pod 'LineableLibrary', :path => '../'
+
+  pod 'Quick', '~> 0.8.0'
+  pod 'Nimble', '3.0.0'
+end
