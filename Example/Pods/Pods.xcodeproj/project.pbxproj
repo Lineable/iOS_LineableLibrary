@@ -18,10 +18,10 @@
 		19ACEE44470662CFFC1912A8C0109BC6 /* LineableLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = CA346BA184160F0C0DB0D046BAD7D5FD /* LineableLibrary.bundle */; };
 		1A8BC0409C49F04F1319F90F67892F0D /* World+DSL.h in Headers */ = {isa = PBXBuildFile; fileRef = 94A039912FDC46FCB2AF6DCEEB91ADB4 /* World+DSL.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		1E28F9362956B758C4C981D3C1129C90 /* BeGreaterThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3CD67A0263B5D926517C112081F48B2 /* BeGreaterThan.swift */; };
-		222254FC1C92858B009882A9 /* LineableDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222254F81C92858B009882A9 /* LineableDetector.swift */; };
-		222254FD1C92858B009882A9 /* LineableHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222254F91C92858B009882A9 /* LineableHelpers.swift */; };
-		222254FE1C92858B009882A9 /* MissingLineable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222254FA1C92858B009882A9 /* MissingLineable.swift */; };
-		222254FF1C92858B009882A9 /* LineableHTTP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222254FB1C92858B009882A9 /* LineableHTTP.swift */; };
+		2229782D1C96AA730070E339 /* LineableDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222978291C96AA730070E339 /* LineableDetector.swift */; };
+		2229782E1C96AA730070E339 /* LineableHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229782A1C96AA730070E339 /* LineableHelpers.swift */; };
+		2229782F1C96AA730070E339 /* MissingLineable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229782B1C96AA730070E339 /* MissingLineable.swift */; };
+		222978301C96AA730070E339 /* LineableHTTP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229782C1C96AA730070E339 /* LineableHTTP.swift */; };
 		243C7EC8DCD58D397FF8D7839D64F2CB /* QuickSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 62241019A9DFE31F82A2CDF8690A163C /* QuickSpec.m */; };
 		2806B982D6F36B1BE958D388A6EE9D51 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7511682ED488897012E4EEC14429BF /* Filter.swift */; };
 		2D3B916F7168E9412EDB95BA203A5BB4 /* ThrowError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BC0728045ED4D4A2C12B52A561EEF7 /* ThrowError.swift */; };
@@ -148,10 +148,10 @@
 		1D42013D479CDC11E7882C7C0045B66B /* AsyncMatcherWrapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AsyncMatcherWrapper.swift; path = Nimble/Wrappers/AsyncMatcherWrapper.swift; sourceTree = "<group>"; };
 		1E8B6303CCFDEBF93094E92D50CAFF38 /* EndWith.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EndWith.swift; path = Nimble/Matchers/EndWith.swift; sourceTree = "<group>"; };
 		20ABC5A3D02301EC1EC014B6ABEFA42A /* NSString+QCKSelectorName.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+QCKSelectorName.m"; path = "Quick/NSString+QCKSelectorName.m"; sourceTree = "<group>"; };
-		222254F81C92858B009882A9 /* LineableDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineableDetector.swift; sourceTree = "<group>"; };
-		222254F91C92858B009882A9 /* LineableHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineableHelpers.swift; sourceTree = "<group>"; };
-		222254FA1C92858B009882A9 /* MissingLineable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MissingLineable.swift; sourceTree = "<group>"; };
-		222254FB1C92858B009882A9 /* LineableHTTP.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineableHTTP.swift; sourceTree = "<group>"; };
+		222978291C96AA730070E339 /* LineableDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineableDetector.swift; sourceTree = "<group>"; };
+		2229782A1C96AA730070E339 /* LineableHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineableHelpers.swift; sourceTree = "<group>"; };
+		2229782B1C96AA730070E339 /* MissingLineable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MissingLineable.swift; sourceTree = "<group>"; };
+		2229782C1C96AA730070E339 /* LineableHTTP.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineableHTTP.swift; sourceTree = "<group>"; };
 		227AD60FAC82B3DEDDBB09BAEE052647 /* Expression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Expression.swift; path = Nimble/Expression.swift; sourceTree = "<group>"; };
 		2543809E4D3D9755B94735346ACDFF03 /* QCKDSL.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = QCKDSL.m; path = Quick/DSL/QCKDSL.m; sourceTree = "<group>"; };
 		25961731CF4F7537A5ECD61A000A150C /* FailureMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FailureMessage.swift; path = Nimble/FailureMessage.swift; sourceTree = "<group>"; };
@@ -449,10 +449,10 @@
 		9DFCF32F1A24212C01FC32F665888FFD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				222254F81C92858B009882A9 /* LineableDetector.swift */,
-				222254F91C92858B009882A9 /* LineableHelpers.swift */,
-				222254FA1C92858B009882A9 /* MissingLineable.swift */,
-				222254FB1C92858B009882A9 /* LineableHTTP.swift */,
+				222978291C96AA730070E339 /* LineableDetector.swift */,
+				2229782A1C96AA730070E339 /* LineableHelpers.swift */,
+				2229782B1C96AA730070E339 /* MissingLineable.swift */,
+				2229782C1C96AA730070E339 /* LineableHTTP.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -782,10 +782,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D7C589660CFEDCC0F4CCC6C74B551E3 /* LineableLibrary-dummy.m in Sources */,
-				222254FF1C92858B009882A9 /* LineableHTTP.swift in Sources */,
-				222254FD1C92858B009882A9 /* LineableHelpers.swift in Sources */,
-				222254FE1C92858B009882A9 /* MissingLineable.swift in Sources */,
-				222254FC1C92858B009882A9 /* LineableDetector.swift in Sources */,
+				222978301C96AA730070E339 /* LineableHTTP.swift in Sources */,
+				2229782E1C96AA730070E339 /* LineableHelpers.swift in Sources */,
+				2229782F1C96AA730070E339 /* MissingLineable.swift in Sources */,
+				2229782D1C96AA730070E339 /* LineableDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1182,6 +1182,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/LineableLibrary/LineableLibrary.modulemap";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = LineableLibrary;
 				SDKROOT = iphoneos;
@@ -1306,6 +1307,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/LineableLibrary/LineableLibrary.modulemap";
 				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = LineableLibrary;
 				SDKROOT = iphoneos;

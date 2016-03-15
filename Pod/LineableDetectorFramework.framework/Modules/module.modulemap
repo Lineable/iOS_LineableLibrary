@@ -1,0 +1,10 @@
+framework module LineableDetectorFramework {
+  umbrella header "LineableDetectorFramework.h"
+
+  export *
+  module * { export * }
+}
+
+module LineableDetectorFramework.Swift {
+    header "LineableDetectorFramework-Swift.h"
+}

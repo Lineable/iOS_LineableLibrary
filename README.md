@@ -20,13 +20,10 @@ class YourClass:UIViewController, LineableDetectorDelegate {
     let lineableDetector = LineableDetector.sharedDetector
     
     func viewDidLoad() {
-        self.lineableDetector.delegate = self
-
         /*
-        *  (Optional) Customize Detecting Options
+        *  Customize Detecting Options. If DetectInterval and BackgroundMode is nil, it sets to default values. Delegate and apikey is required.
         */
-        self.lineableDetector.detectInterval = 60.0
-        self.lineableDetector.backgroundModeEnabled = true
+        self.lineableDetector.setup(delegate: self, apiKey: "YOUR_API_KEY_HERE", detectInterval: 10.0, backgroundModeEnabled: nil)
 
         /*
         * Starts Tracking
@@ -48,9 +45,10 @@ Don't forget to implement the delegate methods.
 ```swift
 func didStartRangingLineables() // Callbacks when tracking starts
 func didStopRangingLineables() // Callbacks when tracking stops
-func didDetectLineables(numberOfLineablesDetected:Int, missingLineable:MissingLineable?) // Callbacks when the Library Detects nearby Lineables via bluetooth. MissingLineable will have a value when there is a reported Lineable nearby. See below for more details about MissingLineable.
 
-func statuschanged(status:LineableDetectorState) // Callbacks whenever the status of the Detector changes. See below for more details.
+func willDetectLineables() // Callbacks just before the detector prepares to send data to server.
+func didDetectLineables(numberOfLineablesDetected:Int, missingLineable:MissingLineable?) // Callbacks when the Library Detects nearby Lineables via bluetooth. MissingLineable will have a value when there is a reported Lineable nearby. See below for more details about MissingLineable.
+func didFailDetectingLineables(error:LineableDetectorError) // Callbacks when an error occurs while detecting
 ```
 
 ### MissingLineable
@@ -62,17 +60,6 @@ var photoUrls:[String] { get set } // Photo URLs of the Missing Lineable. Always
 var reporterName:String? { get set } // The person who reported this Lineable Missing
 var reporterPhoneNumber:String? { get set } // The phone number of the reporter. You can use this to call the protector when the Missing Lineable is found.
 var reportedDate:NSDate? { get set } // The date when reported.
-```
-
-### LineableDetectorState
-```swift
-case NoDetectedLineables // When no Lineables were detected.
-case ErrorSendingLineable // Failed sending the information to the server due to various reasons. 
-case GatewayNoMovement  // When the library is used as a moving gateway and it didn't move a significant distance. Currently not supported.
-case PreparingToSendToServer // Detector is about to send detected nearby Lineables to the server.
-case DetectFinished // Detect Finished and called didDetectLineables(numberOfLineablesDetected:Int, missingLineable:MissingLineable?)
-case Idle // Doing nothing.
-case Listening // Detecting nearby Lineables
 ```
 
 ## Requirements
@@ -88,7 +75,14 @@ it, simply add the following line to your Podfile:
 pod "LineableLibrary"
 ```
 
-**If your app supports iOS9.0 or above, you need to add support for background location service in Xcode.**
+**If your app supports iOS9.0 or above, you need to add support for background location service in Xcode. And also, you need to add NSApptransportSecurity parameter in your Info.plist. **
+```
+<key>NSAppTransportSecurity</key>
+<dict>
+<key>NSAllowsArbitraryLoads</key>
+<true/>
+</dict>
+```
 for instructions, [check this awesome answer in stackoverflow](http://stackoverflow.com/a/31023941)
 
 ## Author

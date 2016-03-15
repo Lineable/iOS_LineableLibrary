@@ -147,7 +147,7 @@ extension LineableHTTP {
     
     public func sendData(type:String,url:String,encoding:LineableHTTPEncodingType,params:[String:AnyObject]?,completion:(result:Int,info:AnyObject?)->()) {
         let sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration()
-        sessionConfig.timeoutIntervalForResource = 45
+        sessionConfig.timeoutIntervalForResource = 5
         
         let session = NSURLSession(configuration: sessionConfig)
         
@@ -179,12 +179,20 @@ extension LineableHTTP {
         let task = session.dataTaskWithRequest(postsUrlRequest, completionHandler: {
             (data, response, error) -> Void in
             
-            guard let data = data else { return }
+            if let errorCode = error?.code {
+                completion(result: errorCode, info: nil)
+                return
+            }
+            
+            guard let data = data else {
+                completion(result: 1009, info: nil)
+                return
+            }
             do {
                 let result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
                     as! NSDictionary
                 
-                guard let resultCode = result["result"]!.integerValue else {
+                guard let resultCode = result["result"]?.integerValue else {
                     completion(result: 1009, info: nil)
                     return
                 }

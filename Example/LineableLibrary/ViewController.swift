@@ -17,13 +17,15 @@ class ViewController: UIViewController, LineableDetectorDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        LineableDetector.sharedDetector.delegate = self
-        
         /*
-         *  Customize Detecting Options
-         */
-        LineableDetector.sharedDetector.detectInterval = 60.0
-        LineableDetector.sharedDetector.backgroundModeEnabled = true
+        *  Customize Detecting Options
+        */
+        LineableDetector.sharedDetector.setup(delegate: self, apiKey: "111111", detectInterval: 10.0, backgroundModeEnabled: nil)
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        self.didStart = LineableDetector.sharedDetector.state == LineableDetectorState.Idle ? false : true
+        self.toggle()
     }
     
     override func didReceiveMemoryWarning() {
@@ -32,18 +34,20 @@ class ViewController: UIViewController, LineableDetectorDelegate {
     }
     
     @IBAction func startButtonTapped(sender: AnyObject) {
-        
+        self.didStart = !self.didStart
+        self.toggle()
+    }
+    
+    func toggle() {
         if didStart {
-            //Stop
-            self.didStart = false
-            self.startButton.setTitle("Start", forState: UIControlState.Normal)
-            LineableDetector.sharedDetector.stopTracking()
+            //Start
+            self.startButton.setTitle("Stop", forState: UIControlState.Normal)
+            LineableDetector.sharedDetector.start()
         }
         else {
-            //Start
-            self.didStart = true
-            self.startButton.setTitle("Stop", forState: UIControlState.Normal)
-            LineableDetector.sharedDetector.startTracking()
+            //Stop
+            self.startButton.setTitle("Start", forState: UIControlState.Normal)
+            LineableDetector.sharedDetector.stop()
         }
     }
     
@@ -55,30 +59,33 @@ class ViewController: UIViewController, LineableDetectorDelegate {
         self.statusLabel.text = "Lineable Detector Stopped."
     }
     
+    func willDetectLineables() {
+        self.statusLabel.text = "Preparing to detect nearby Lineables."
+    }
+    
     func didDetectLineables(numberOfLineablesDetected:Int, missingLineable:MissingLineable?) {
         let msg = "\(numberOfLineablesDetected) Lineable Detected."
-        let missingText = missingLineable == nil ? "" : "\nMissingLineable: \(missingLineable?.name)"
+        let missingText = missingLineable == nil ? "" : "\nMissingLineable: \(missingLineable!.name)"
         self.statusLabel.text = msg + missingText
     }
     
-    func statuschanged(status:LineableDetectorState) {
+    func didFailDetectingLineables(error: LineableDetectorError) {
         var msg = ""
-        switch status {
-        case LineableDetectorState.ErrorSendingLineable:
-            msg = "Cannot send detect info to server."
-        case LineableDetectorState.GatewayNoMovement:
+        switch error {
+        case .BluetoothOff:
+            msg = "Bluetooth is turned off"
+        case .ConnectionFailed:
+            msg = "Connection Failed with server"
+        case .GatewayDidNotMove:
             msg = "Gateway didn't move specific amount of distance."
-        case LineableDetectorState.NoDetectedLineables:
-            msg = "No Lineable Detected."
-        case LineableDetectorState.Idle:
-            msg = "Waiting.."
-        case LineableDetectorState.PreparingToSendToServer:
-            msg = "Listening to nearby Lineables."
-        default:
-            return
+        case .NoLineableDetected:
+            msg = "No Lineables Detected"
+        case .ConnectionTimeout:
+            msg = "Connection Timeout"
         }
+        
         self.statusLabel.text = msg
     }
-    
+
 }
 

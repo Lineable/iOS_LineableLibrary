@@ -12,23 +12,27 @@ import UIKit
 import CoreLocation
 import CoreBluetooth
 
+@objc public enum LineableDetectorError:Int {
+    case BluetoothOff
+    case NoLineableDetected
+    case ConnectionFailed
+    case ConnectionTimeout
+    case GatewayDidNotMove
+}
+
 @objc public enum LineableDetectorState:Int {
-    case NoDetectedLineables = 0
-    case ErrorSendingLineable = 1
-    case GatewayNoMovement = 2
-    case PreparingToSendToServer = 3
-    case DetectFinished = 4
-    case Idle = 5
-    case Listening = 6
+    case Idle
+    case Listening
 }
 
 @objc public protocol LineableDetectorDelegate {
     
     func didStartRangingLineables()
     func didStopRangingLineables()
-    func didDetectLineables(numberOfLineablesDetected:Int, missingLineable:MissingLineable?)
     
-    func statuschanged(status:LineableDetectorState)
+    func willDetectLineables()
+    func didDetectLineables(numberOfLineablesDetected:Int, missingLineable:MissingLineable?)
+    func didFailDetectingLineables(error:LineableDetectorError)
 }
 
 public protocol LineableDetectorProtocol {
@@ -40,14 +44,17 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     
     public static let sharedDetector = LineableDetector()
     
-    public var delegate:LineableDetectorDelegate? = nil
+    public var state:LineableDetectorState = .Idle
+    
+    private var delegate:LineableDetectorDelegate? = nil
+    private var apiKey:String = ""
+    private var detectInterval = 60.0
+    private var backgroundModeEnabled = true
+    
     public var lineableDetectorProtocol:LineableDetectorProtocol? = nil
     
     public var missingLineable:MissingLineable? = nil
     public var user:UserProtocol? = nil
-    
-    public var detectInterval = 60.0
-    public var backgroundModeEnabled = true
     
     let locationManager:CLLocationManager = CLLocationManager()
     public var lastLocation:CLLocation?
@@ -88,17 +95,44 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     
     dynamic private func applicationEnteredBackground() {
         if !self.backgroundModeEnabled && self.isTracking {
-            self.stopTracking()
+            self.stop()
         }
     }
     
     dynamic private func applicationWillEnterForeground() {
         if !self.backgroundModeEnabled && self.isTracking {
-            self.startTracking()
+            self.start()
         }
     }
     
-    public func stopTracking() {
+    //MARK: Only For ObjC
+    public func setup(delegate delegate:LineableDetectorDelegate,apiKey:String) {
+        self.setup(delegate: delegate, apiKey: apiKey, detectInterval: detectInterval, backgroundModeEnabled: backgroundModeEnabled)
+    }
+    public func setDetectInterval(interval:Double) {
+        self.detectInterval = interval
+    }
+    public func setBackgroundMode(enabled:Bool) {
+        self.backgroundModeEnabled = enabled
+    }
+    
+    //MARK: For Swift
+    public func setup(delegate delegate:LineableDetectorDelegate,apiKey:String,detectInterval:Double?,backgroundModeEnabled:Bool?) {
+        
+        self.delegate = delegate
+        self.apiKey = apiKey
+        
+        if let detectInterval = detectInterval {
+            if detectInterval < 10.0 { self.detectInterval = 10.0 }
+            else { self.detectInterval = detectInterval }
+        }
+        
+        if let backgroundModeEnabled = backgroundModeEnabled {
+            self.backgroundModeEnabled = backgroundModeEnabled
+        }
+    }
+    
+    public func stop() {
         
         self.isTracking = false
         
@@ -107,11 +141,11 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
             locationManager.stopMonitoringForRegion(locationRegion)
         }
         
-        self.delegate?.statuschanged(LineableDetectorState.Idle)
+        self.state = .Idle
         self.stopRanging()
     }
     
-    public func startTracking() {
+    public func start() {
         
         self.isTracking = true
         
@@ -120,7 +154,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
             locationManager.startMonitoringForRegion(locationRegion)
         }
         
-        self.delegate?.statuschanged(LineableDetectorState.Listening)
+        self.state = .Listening
         self.startRanging()
     }
     
@@ -173,7 +207,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     
     public func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
         if self.backgroundModeEnabled {
-            self.startTracking()
+            self.start()
         }
         
     }
@@ -181,13 +215,13 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     
     public func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
         if self.backgroundModeEnabled {
-            self.startTracking()
+            self.start()
         }
     }
     
     public func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
         if self.backgroundModeEnabled {
-            self.startTracking()
+            self.start()
         }
     }
     
@@ -257,7 +291,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
             if interval >= self.detectInterval {
                 
                 if self.isTracking {
-                    startRanging()
+                    start()
                 }
                 
             }
@@ -295,9 +329,11 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         }
     }
     
+    var movingGatewayDistanceLimit = 50.0
+    private var previousCoordinate:CLLocationCoordinate2D?
     private func detectToServerIfPossible() {
         
-        if self.isPreparingDetection {
+        if self.isPreparingDetection || !self.isTracking {
             return
         }
         
@@ -319,13 +355,29 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
             }
         }
         
+        if let gateway = self.gateway where gateway.coordinate == nil && needsToDetect {
+            if let previousCoordinate = self.previousCoordinate, lastLocationCoordinate = self.lastLocation?.coordinate {
+                //had previous coordinate. check if moved, if not, send to server
+                let distance = CLLocation.distance(previousCoordinate, to: lastLocationCoordinate)
+                if distance >= self.movingGatewayDistanceLimit {
+                    needsToDetect = true
+                }
+                else {
+                    needsToDetect = false
+                }
+            }
+            else {
+                //dont have previous coordinate. send right now
+                needsToDetect = true
+            }
+        }
+        
         if needsToDetect {
             self.detectAndSendToServer()
         }
         else {
             self.listenedBeacons.removeAll()
         }
-
     }
     
     private func checkForHeartBeat() {
@@ -348,11 +400,11 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         }
     }
     
-    func detectAndSendToServer() {
+    private func detectAndSendToServer() {
         self.isPreparingDetection = true
         self.listenedBeacons.removeAll(keepCapacity: false)
         self.lastDetectTimeStamp = NSDate()
-        self.delegate?.statuschanged(LineableDetectorState.PreparingToSendToServer)
+        self.delegate?.willDetectLineables()
         NSTimer.scheduledTimerWithTimeInterval(kListeningTime, target: self, selector: Selector("sendLineablesToServer"), userInfo: nil, repeats: false)
     }
     
@@ -361,86 +413,40 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         self.sendHeartbeat(self.lastLocation)
     }
     
-    var movingGatewayDistanceLimit = 50.0
-    private var previousCoordinate:CLLocationCoordinate2D?
-    private func checkIfSendGateway(gateway:Gateway) -> Bool {
-        //Needs to send to gateway. if moving gateway check speed, else proceed
-        if let _ = gateway.coordinate {
-            //stationary gateway
-            return true
-        }
-        else {
-            
-            if let previousCoordinate = self.previousCoordinate, lastLocationCoordinate = self.lastLocation?.coordinate {
-                //had previous coordinate. check if moved, if not, send to server
-                let distance = CLLocation.distance(previousCoordinate, to: lastLocationCoordinate)
-                if distance >= self.movingGatewayDistanceLimit {
-                    return true
-                }
-                else {
-                    self.isPreparingDetection = false
-                    self.listenedBeacons.removeAll()
-                    self.delegate?.statuschanged(LineableDetectorState.GatewayNoMovement)
-                    return false
-                }
-            }
-            else {
-                //dont have previous coordinate. send right now
-                return true
-            }
-        }
-    }
-    
     func sendLineablesToServer() {
         if self.listenedBeacons.count == 0 {
             self.isPreparingDetection = false
-            self.delegate?.statuschanged(LineableDetectorState.NoDetectedLineables)
+            self.delegate?.didFailDetectingLineables(.NoLineableDetected)
             return
         }
         
-        if let gateway = self.gateway {
-            
-            if !self.checkIfSendGateway(gateway) { return }
-            
-            self.sendDetectedBeaconsAsGateway(gateway, beacons: self.listenedBeacons, completion: { (result) in
-                self.isPreparingDetection = false
-                
-                if result == 200 {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.delegate?.statuschanged(LineableDetectorState.DetectFinished)
-                        self.delegate?.didDetectLineables(self.listenedBeacons.count, missingLineable:nil)
-                        self.listenedBeacons.removeAll()
-                    }
-                }
-                else {
-                    self.listenedBeacons.removeAll()
-                    self.delegate?.statuschanged(LineableDetectorState.ErrorSendingLineable)
-                }
-            })
+        var connectedLineables = [[String:String]]()
+        if let hasConnectedLineables = self.lineableDetectorProtocol?.connectedLineables() {
+            connectedLineables = hasConnectedLineables
         }
-        else {
-            var connectedLineables = [[String:String]]()
-            if let hasConnectedLineables = self.lineableDetectorProtocol?.connectedLineables() {
-                connectedLineables = hasConnectedLineables
-            }
-
-            self.sendDetectedBeacons(self.listenedBeacons, connectedLineables: connectedLineables, completion: { (result,missingLineable) in
-                self.isPreparingDetection = false
-                
+        
+        self.sendDetectedBeacons(self.listenedBeacons, connectedLineables: connectedLineables, completion: { (result,missingLineable) in
+            self.isPreparingDetection = false
+            
+            let dispatchTime: dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(0.0 * Double(NSEC_PER_SEC)))
+            dispatch_after(dispatchTime, dispatch_get_main_queue(), {
                 if result == 200 {
                     self.missingLineable = missingLineable
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.delegate?.statuschanged(LineableDetectorState.DetectFinished)
                         self.delegate?.didDetectLineables(self.listenedBeacons.count, missingLineable:missingLineable)
                         self.listenedBeacons.removeAll()
                     }
                 }
+                else if result == -1001 {
+                    self.listenedBeacons.removeAll()
+                    self.delegate?.didFailDetectingLineables(.ConnectionTimeout)
+                }
                 else {
                     self.listenedBeacons.removeAll()
-                    self.delegate?.statuschanged(LineableDetectorState.ErrorSendingLineable)
+                    self.delegate?.didFailDetectingLineables(.ConnectionFailed)
                 }
             })
-        }
+        })
         
     }
     
@@ -464,44 +470,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
         
         return allListened
     }
-    
-    private func sendDetectedBeaconsAsGateway(gateway:Gateway,beacons:[CLBeacon], completion:(result:Int)->()) {
-        
-        var beaconsDicArray = [Dictionary<String,String>]()
-        for beacon in beacons {
-            
-            let major = String(format: "%05d", beacon.major.integerValue);
-            let minor = String(format: "%05d", beacon.minor.integerValue);
-            
-            let serial = "\(beacon.proximityUUID.UUIDString)-\(major)-\(minor)"
-            let rssi = "\(beacon.rssi)"
-            
-            let beaconDic = ["serial":serial, "rssi":rssi]
-            beaconsDicArray.append(beaconDic)
-        }
-        
-        var accu = 0.0
-        var loc = CLLocation(latitude: 0, longitude: 0)
-        if let location = self.lastLocation {
-            loc = location
-            accu = location.horizontalAccuracy
-            self.previousCoordinate = location.coordinate
-        }
-        
-        if let coordinate = gateway.coordinate {
-            loc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-            accu = 0.0
-        }
-        
-        let geoInfo = ["latitude":loc.coordinate.latitude, "longitude":loc.coordinate.longitude, "accuracy":accu]
-        
-        let param:Dictionary<String,AnyObject> = ["id":gateway.id,"name":gateway.name,"description":"","type":"3", "beacons":beaconsDicArray, "geo_info":geoInfo]
-        
-        self.sendData("POST", url: "\(kDETECTURL)/gw_app", encoding:.JSON, params: param, completion: {(result,info) in
-            completion(result: result)
-        })
-    }
-    
+
     public func sendDetectedBeacons(beacons:[CLBeacon],connectedLineables:[[String:String]], completion:(result:Int,missingLineable:MissingLineable?)->()) {
         
         var beaconsDicArray = [Dictionary<String,String>]()
@@ -528,18 +497,29 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
             accu = location.horizontalAccuracy
         }
         
-        let geoInfo = ["latitude":loc.coordinate.latitude, "longitude":loc.coordinate.longitude, "accuracy":accu]
+        var geoInfo = [String:Double]()
         
-        var param:Dictionary<String,AnyObject> = ["phone_type":"1", "beacons":beaconsDicArray, "geo_info":geoInfo]
-        if self.user != nil {
-            param["user_seq"] = "\(self.user!.seq)"
+        var param:Dictionary<String,AnyObject> = ["beacons":beaconsDicArray, "api_key":self.apiKey]
+        
+        if let gateway = self.gateway {
+            if let coordinate = gateway.coordinate {
+                loc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                accu = 0.0
+            }
+            
+            param["name"] = gateway.name
+        }
+        else {
+            if self.user != nil {
+                param["user_seq"] = "\(self.user!.seq)"
+                param["name"] = self.user!.name
+            }
         }
         
-        if let bundleID = NSBundle.mainBundle().bundleIdentifier {
-            param["api_key"] = bundleID
-        }
+        geoInfo = ["latitude":loc.coordinate.latitude, "longitude":loc.coordinate.longitude, "accuracy":accu]
+        param["geo_info"] = geoInfo
         
-        self.sendData("POST", url: "\(kDETECTURL)/app", encoding:.JSON, params: param, completion: {(result,infoarray) in
+        self.sendData("POST", url: "\(kDETECTURL)/detect", encoding:.JSON, params: param, completion: {(result,infoarray) in
             
             let info = infoarray as? [[String:AnyObject]]
             if info != nil {
