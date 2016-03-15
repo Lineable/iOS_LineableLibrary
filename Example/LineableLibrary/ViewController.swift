@@ -20,7 +20,7 @@ class ViewController: UIViewController, LineableDetectorDelegate {
         /*
         *  Customize Detecting Options
         */
-        LineableDetector.sharedDetector.setup(delegate: self, apiKey: "111111", detectInterval: 10.0, backgroundModeEnabled: nil)
+        LineableDetector.sharedDetector.setup(delegate: self, apiKey: "YOUR_API_KEY_HERE", detectInterval: 10.0, backgroundModeEnabled: nil)
     }
     
     override func viewDidAppear(animated: Bool) {

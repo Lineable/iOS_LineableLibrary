@@ -12,15 +12,9 @@ import CoreLocation
 import CoreBluetooth
 
 #if DEBUG
-public let kBASEURL = "https://dev.lineable.net"
-public let kACCOUNTURL = "http://dev.lineable.net:9090"
 public let kDETECTURL = "http://dev.lineable.net:8099"
-public let kAWSTOKEN = "https://dev.lineable.net/log/getToken"
 #else
-public let kBASEURL = "https://apiv2.lineable.net"
-public let kACCOUNTURL = "https://account.lineable.net"
 public let kDETECTURL = "https://detect.lineable.net"
-public let kAWSTOKEN = "https://apiv2.lineable.net/log/getToken"
 #endif
 
 public protocol LineableHTTP {}

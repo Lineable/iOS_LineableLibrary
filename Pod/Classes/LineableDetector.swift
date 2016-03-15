@@ -59,7 +59,7 @@ public class LineableDetector: NSObject, CLLocationManagerDelegate, LineableHTTP
     let locationManager:CLLocationManager = CLLocationManager()
     public var lastLocation:CLLocation?
     
-    var lineableRegions = LineableRegions()
+    public var lineableRegions = LineableRegions()
     var isTracking = false
     var isPreparingDetection = false
     
@@ -593,9 +593,9 @@ struct Gateway {
     }
 }
 
-struct LineableRegions {
+public struct LineableRegions {
     
-    let uuidstrs:Array<String>
+    public let uuidstrs:Array<String>
     let regions:Array<CLBeaconRegion>
     var isRangingForRegion = [String:Bool]()
     
