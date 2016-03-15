@@ -21,11 +21,11 @@ Detect active Lineables near the users.
 If there are missing Lineables nearby, the data(The picture of a missing child, phone numbers of the parents and etc) will be provided and you can choose whether to notify the user or not. If you choose to notifty the user, the user can contribute to find the child.
                        DESC
 
-  s.homepage         = "https://github.com/Lineable/Library-for-iOS-Swift.git"
+  s.homepage         = "https://github.com/Lineable/iOS_LineableLibrary.git"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Doheny Yoon" => "berrymelon@lineable.net" }
-  s.source           = { :git => "https://github.com/Lineable/Library-for-iOS-Swift.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/Lineable/iOS_LineableLibrary.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/lineable_inc'
 
   s.platform     = :ios, '8.0'
